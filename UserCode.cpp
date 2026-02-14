@@ -31,16 +31,25 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
   // For example, "in.joystickInput.buttonBlue" is true if the
   // joystick's blue button is pushed, false otherwise.
 
+
+
   //Define the output numbers (in the struct outVals):
   MainLoopOutput outVals;
 //  motorCommand1 -> located at body +x +y
 //  motorCommand2 -> located at body +x -y
 //  motorCommand3 -> located at body -x -y
 //  motorCommand4 -> located at body -x +y
-  outVals.motorCommand1 = 0;
-  outVals.motorCommand2 = 0;
-  outVals.motorCommand3 = 0;
-  outVals.motorCommand4 = 0;
+  if (lastMainLoopInputs.joystickInput.buttonBlue){
+    outVals.motorCommand1 = 50;
+    outVals.motorCommand2 = 50;
+    outVals.motorCommand3 = 50;
+    outVals.motorCommand4 = 50;}
+  else{
+    outVals.motorCommand1 = 0;
+    outVals.motorCommand2 = 0;
+    outVals.motorCommand3 = 0;
+    outVals.motorCommand4 = 0;
+  }
 
   //copy the inputs and outputs:
   lastMainLoopInputs = in;
