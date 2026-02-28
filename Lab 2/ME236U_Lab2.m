@@ -1,0 +1,62 @@
+clc; clear; close all;
+
+logFiles = {'Log-1000.csv', 'Log-1200.csv', 'Log-1400.csv', 'Log-1600.csv'};
+cmdSpd = [1000, 1200, 1400, 1600];
+idxStart = [2422, 3649, 5300, 1200]; % Manually determined indexes
+idxEnd = [4200, 6000, 8300, 1800];
+avgAccelZ = zeros(4,1);
+sinBeta = zeros(4,1);
+Fp = zeros(4,1);
+m_r = 8.5*10^(-3);
+m_b = 32*10^(-3);
+l = 150*10^(-3);
+l_r = 70*10^(-3);
+g = 9.81;
+
+
+data = cell(4,1);
+figure
+for i = 1:length(cmdSpd)
+    data{i} = extractData(logFiles{i});
+    subplot(2,2,i)
+    plot(data{i}.Time, data{i}.AccelZ);
+    hold on
+    grid on
+    xlabel("Time (s)")
+    ylabel("Accel Z (m/s^2)")
+    xline(data{i}.Time(idxStart(i)))
+    xline(data{i}.Time(idxEnd(i)))
+    title("Radians per second: " + cmdSpd(i));
+    matTemp = data{i}.AccelZ(idxStart(i):idxEnd(i));
+    avgAccelZ(i) = sum(matTemp)/length(matTemp);
+    yline(avgAccelZ(i))
+    sinBeta(i) = avgAccelZ(i)/g;
+    Fp(i) = (m_r * g *sinBeta(i) * (l_r/l) + m_b*g*sinBeta(i))/4;
+end
+
+figure
+hold on
+grid on
+plot(cmdSpd, Fp);
+xlabel("Motor Cmd(rad/s)")
+ylabel("Thrust per propeller (N)")
+
+
+
+
+
+
+
+function accelData = extractData(filename)
+    opts = detectImportOptions(filename);
+    opts.PreserveVariableNames = true;
+    
+    % Read the data into a table
+    dataTable = readtable(filename, opts);
+    accelData = struct();
+
+    accelData.Time   = dataTable.('Time');
+    accelData.AccelX = dataTable.('Accelerometer x');
+    accelData.AccelY = dataTable.('Accelerometer y');
+    accelData.AccelZ = dataTable.('Accelerometer z');
+end

@@ -1,0 +1,31 @@
+clc; clear; close all;
+
+logFiles = {'Log-1000.csv', 'Log-1200.csv', 'Log-1400.csv', 'Log-1600.csv'};
+cmdSpd = [1000, 1200, 1400, 1600];
+
+data1000 = extractData('Log-1000.csv');
+figure
+for i = 1:length(cmdSpd)
+    subplot(2,2,1)
+    plot(data1000.Time, data1000.AccelZ);
+    hold on
+    grid on
+    xlabel("Time (s)")
+    ylabel("Accel Z (m/s^2)")
+    title("Radians per second: " + cmdSpd(1));
+end
+
+
+function accelData = extractData(filename)
+    opts = detectImportOptions(filename);
+    opts.PreserveVariableNames = true;
+    
+    % Read the data into a table
+    dataTable = readtable(filename, opts);
+    accelData = struct();
+
+    accelData.Time   = dataTable.('Time');
+    accelData.AccelX = dataTable.('Accelerometer x');
+    accelData.AccelY = dataTable.('Accelerometer y');
+    accelData.AccelZ = dataTable.('Accelerometer z');
+end
