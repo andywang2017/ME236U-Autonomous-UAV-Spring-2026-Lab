@@ -33,6 +33,7 @@ legend('Location', 'best')
 %% Problem 5
 dataP5 = extractData(logFilesProb5{2});
 
+%%% Plotting
 figure
 subplot(1,3,1)
 plot(dataP5.Time, dataP5.DebugValue0)
@@ -77,6 +78,33 @@ title(sprintf(['Yaw Estimate vs Time \n' ...
 yur = xline(15.55, DisplayName = 'Motion End');
 legend(yur, 'Location', 'best')
 
+diffRoll = zeros(1, length(logFilesProb5));
+diffPitch = zeros(1, length(logFilesProb5));
+diffYaw = zeros(1, length(logFilesProb5));
+
+for i = 1:length(logFilesProb5)
+    data = extractData(logFilesProb5{i});
+    
+    startRoll = mean(data.DebugValue0(1:5)); 
+    endRoll = mean(data.DebugValue0(end-5:end-1));
+    startPitch = mean(data.DebugValue1(1:5)); 
+    endPitch = mean(data.DebugValue1(end-5:end-1));
+    startYaw = mean(data.DebugValue2(1:5)); 
+    endYaw = mean(data.DebugValue2(end-5:end-1));
+    
+    diffRoll(i)  = endRoll - startRoll;
+    diffPitch(i) = endPitch - startPitch;
+    diffYaw(i)   = endYaw - startYaw;
+end
+
+avgDiffRoll  = mean(diffRoll);
+avgDiffPitch = mean(diffPitch);
+avgDiffYaw   = mean(diffYaw);
+
+fprintf('-------------Problem 5 Analysis--------------\n');
+fprintf('Average Roll Difference:  %.6f rads\n', avgDiffRoll);
+fprintf('Average Pitch Difference: %.6f rads\n', avgDiffPitch);
+fprintf('Average Yaw Difference:   %.6f rads\n', avgDiffYaw);
 
 %% Function
 function accelData = extractData(filename)
