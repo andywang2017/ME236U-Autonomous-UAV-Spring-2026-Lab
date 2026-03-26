@@ -38,7 +38,7 @@ subplot(1,3,1)
 plot(dataP5.Time, dataP5.DebugValue0)
 grid on
 xlabel('Time (s)')
-ylabel('Roll Estimate')
+ylabel('Roll Estimate (rads)')
 title('Roll Estimate vs Time')
 ylim([-1.5,1.5])
 startVals = mean(dataP5.DebugValue0(1:5)); 
@@ -52,7 +52,7 @@ subplot(1,3,2)
 plot(dataP5.Time, dataP5.DebugValue1)
 grid on
 xlabel('Time (s)')
-ylabel('Pitch Estimate')
+ylabel('Pitch Estimate (rads)')
 title('Pitch Estimate vs Time')
 ylim([-1.5,1.5])
 startVals = mean(dataP5.DebugValue1(1:5)); 
@@ -67,7 +67,7 @@ subplot(1,3,3)
 plot(dataP5.Time, dataP5.DebugValue2)
 grid on
 xlabel('Time (s)')
-ylabel('Yaw Estimate')
+ylabel('Yaw Estimate (rads)')
 title('Yaw Estimate vs Time')
 ylim([-1.5,1.5])
 startVals = mean(dataP5.DebugValue2(1:5)); 
