@@ -138,10 +138,10 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
 
     if (lastMainLoopInputs.joystickInput.buttonBlue){
 
-          float c1 = 0.25f * (desTotalForce - desTorque.x / l + desTorque.y / l - desTorque.z / kappa);
-          float c2 = 0.25f * (desTotalForce + desTorque.x / l + desTorque.y / l + desTorque.z / kappa);
-          float c3 = 0.25f * (desTotalForce + desTorque.x / l - desTorque.y / l - desTorque.z / kappa);
-          float c4 = 0.25f * (desTotalForce - desTorque.x / l - desTorque.y / l + desTorque.z / kappa);
+          float c1 = 0.25f * (desTotalForce + desTorque.x / l - desTorque.y / l + desTorque.z / kappa);
+          float c2 = 0.25f * (desTotalForce - desTorque.x / l - desTorque.y / l - desTorque.z / kappa);
+          float c3 = 0.25f * (desTotalForce - desTorque.x / l + desTorque.y / l + desTorque.z / kappa);
+          float c4 = 0.25f * (desTotalForce + desTorque.x / l + desTorque.y / l - desTorque.z / kappa);
 
           float s1 = speedFromForce(c1);
           float s2 = speedFromForce(c2);
