@@ -95,9 +95,11 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
   float const timeConstant_pitchRate = timeConstant_rollRate;
   float const timeConstant_yawRate = 0.5f;
 
-  float const timeConstant_rollAngle = 0.4f;
+  float const timeConstant_rollAngle = 0.4f ;
   float const timeConstant_pitchAngle = timeConstant_rollAngle;
   float const timeConstant_yawAngle = 1.0f;
+
+  float desNormalizedAcceleration = 8.0f; //Normalized Total Thrust in [m/s^2]
 
   Vec3f cmdAngAcc= Vec3f(0,0,0);
   Vec3f desAngVel = Vec3f(0,0,0);
@@ -107,6 +109,16 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
 
   Vec3f desAngularAcceleration = Vec3f(0,0,0); // Desired Angular Acceleration [rad/s^2]
 
+  if (lastMainLoopInputs.joystickInput.buttonBlue){
+
+    desAng = Vec3f(0, 0.5236, 0);
+
+    }
+  else{
+
+    desAng = Vec3f(0,0,0);
+
+    }
 
   cmdAngVel.x = (-1/timeConstant_rollAngle) * (estRoll - desAng.x);
   cmdAngVel.y = (-1/timeConstant_pitchAngle) * (estPitch - desAng.y);
@@ -125,40 +137,28 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
   outVals.telemetryOutputs_plusMinus100[6] = cmdAngVel.x;
   outVals.telemetryOutputs_plusMinus100[7] = cmdAngVel.y;
   outVals.telemetryOutputs_plusMinus100[8] = cmdAngVel.z;
+  outVals.telemetryOutputs_plusMinus100[9] = desAng[1];
 
   desAngularAcceleration = cmdAngAcc;
-
-  float desNormalizedAcceleration = 8.0f; //Normalized Total Thrust in [m/s^2]
-
 
   float desTotalForce = desNormalizedAcceleration * mass; // Desired Total Force [N]
   desTorque.x = desAngularAcceleration[0] * inertia_xx;
   desTorque.y = desAngularAcceleration[1] * inertia_yy;
   desTorque.z = desAngularAcceleration[2] * inertia_zz;
 
-    if (lastMainLoopInputs.joystickInput.buttonBlue){
+  float c1 = 0.25f * (desTotalForce + desTorque.x / l - desTorque.y / l + desTorque.z / kappa);
+  float c2 = 0.25f * (desTotalForce - desTorque.x / l - desTorque.y / l - desTorque.z / kappa);
+  float c3 = 0.25f * (desTotalForce - desTorque.x / l + desTorque.y / l + desTorque.z / kappa);
+  float c4 = 0.25f * (desTotalForce + desTorque.x / l + desTorque.y / l - desTorque.z / kappa);
 
-          float c1 = 0.25f * (desTotalForce + desTorque.x / l - desTorque.y / l + desTorque.z / kappa);
-          float c2 = 0.25f * (desTotalForce - desTorque.x / l - desTorque.y / l - desTorque.z / kappa);
-          float c3 = 0.25f * (desTotalForce - desTorque.x / l + desTorque.y / l + desTorque.z / kappa);
-          float c4 = 0.25f * (desTotalForce + desTorque.x / l + desTorque.y / l - desTorque.z / kappa);
-
-          float s1 = speedFromForce(c1);
-          float s2 = speedFromForce(c2);
-          float s3 = speedFromForce(c3);
-          float s4 = speedFromForce(c4);
-          outVals.motorCommand1 = pwmCommandFromSpeed(s1);
-          outVals.motorCommand2 = pwmCommandFromSpeed(s2);
-          outVals.motorCommand3 = pwmCommandFromSpeed(s3);
-          outVals.motorCommand4 = pwmCommandFromSpeed(s4);
-
-        }
-        else{
-          outVals.motorCommand1 = 0;
-          outVals.motorCommand2 = 0;
-          outVals.motorCommand3 = 0;
-          outVals.motorCommand4 = 0;
-        }
+  float s1 = speedFromForce(c1);
+  float s2 = speedFromForce(c2);
+  float s3 = speedFromForce(c3);
+  float s4 = speedFromForce(c4);
+  outVals.motorCommand1 = pwmCommandFromSpeed(s1);
+  outVals.motorCommand2 = pwmCommandFromSpeed(s2);
+  outVals.motorCommand3 = pwmCommandFromSpeed(s3);
+  outVals.motorCommand4 = pwmCommandFromSpeed(s4);
 
   //copy the inputs and outputs:
   lastMainLoopInputs = in;
