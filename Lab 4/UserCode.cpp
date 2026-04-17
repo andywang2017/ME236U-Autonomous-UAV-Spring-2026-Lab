@@ -71,26 +71,12 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
   estPitch = (1 - rho) * (estPitch + dt* rateGyro_corr.y) + rho * measPitch;
   estYaw = estYaw + dt * rateGyro_corr.z;
 
+  // Outputing values for log
   outVals.telemetryOutputs_plusMinus100[0] = estRoll;
   outVals.telemetryOutputs_plusMinus100[1] = estPitch;
   outVals.telemetryOutputs_plusMinus100[2] = estYaw;
 
-
-
-//  float c1 = 0.25f * (desTotalForce - desTorque.x / l + desTorque.y / l - desTorque.z / kappa);
-//        float c2 = 0.25f * (desTotalForce + desTorque.x / l + desTorque.y / l + desTorque.z / kappa);
-//        float c3 = 0.25f * (desTotalForce + desTorque.x / l - desTorque.y / l - desTorque.z / kappa);
-//        float c4 = 0.25f * (desTotalForce - desTorque.x / l - desTorque.y / l + desTorque.z / kappa);
-//
-//        float s1 = speedFromForce(c1);
-//        float s2 = speedFromForce(c2);
-//        float s3 = speedFromForce(c3);
-//        float s4 = speedFromForce(c4);
-//        outVals.motorCommand1 = pwmCommandFromSpeed(s1);
-//        outVals.motorCommand2 = pwmCommandFromSpeed(s2);
-//        outVals.motorCommand3 = pwmCommandFromSpeed(s3);
-//        outVals.motorCommand4 = pwmCommandFromSpeed(s4);
-
+  //Set Constants
   float const timeConstant_rollRate = 0.04f;
   float const timeConstant_pitchRate = timeConstant_rollRate;
   float const timeConstant_yawRate = 0.5f;
@@ -119,17 +105,18 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
     desAng = Vec3f(0,0,0);
 
     }
-
+  
+  // Outer loop cascaded controller
   cmdAngVel.x = (-1/timeConstant_rollAngle) * (estRoll - desAng.x);
   cmdAngVel.y = (-1/timeConstant_pitchAngle) * (estPitch - desAng.y);
   cmdAngVel.z = (-1/timeConstant_yawAngle) * (estYaw - desAng.z);
   desAngVel = cmdAngVel;
-
+  // Inner loop cascaded controller
   cmdAngAcc.x = (-1/timeConstant_rollRate) * (rateGyro_corr.x - desAngVel.x);
   cmdAngAcc.y = (-1/timeConstant_pitchRate) * (rateGyro_corr.y - desAngVel.y);
   cmdAngAcc.z = (-1/timeConstant_yawRate) * (rateGyro_corr.z - desAngVel.z);
 
-
+  // Outputing values for log
   outVals.telemetryOutputs_plusMinus100[3] = cmdAngAcc.x;
   outVals.telemetryOutputs_plusMinus100[4] = cmdAngAcc.y;
   outVals.telemetryOutputs_plusMinus100[5] = cmdAngAcc.z;
@@ -146,11 +133,13 @@ MainLoopOutput MainLoop(MainLoopInput const &in) {
   desTorque.y = desAngularAcceleration[1] * inertia_yy;
   desTorque.z = desAngularAcceleration[2] * inertia_zz;
 
+  // Mixer Matrix Equations
   float c1 = 0.25f * (desTotalForce + desTorque.x / l - desTorque.y / l + desTorque.z / kappa);
   float c2 = 0.25f * (desTotalForce - desTorque.x / l - desTorque.y / l - desTorque.z / kappa);
   float c3 = 0.25f * (desTotalForce - desTorque.x / l + desTorque.y / l + desTorque.z / kappa);
   float c4 = 0.25f * (desTotalForce + desTorque.x / l + desTorque.y / l - desTorque.z / kappa);
-
+  
+  // Calculating Motor Commands
   float s1 = speedFromForce(c1);
   float s2 = speedFromForce(c2);
   float s3 = speedFromForce(c3);
